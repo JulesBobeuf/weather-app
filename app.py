@@ -15,5 +15,13 @@ def createDatabase():
     con.commit()
     con.close()
 
+def ajoutVille(ville,pays):
+    values = "\'"+ville+"\',\'"+pays
+    con = sql.connect('bd.db')
+    cur = con.cursor()
+    cur.execute("INSERT INTO VILLE(nomVille,nomPays) VALUES ( " + values + ");")
+    con.commit()
+    con.close()
+
 if __name__ == '__main__':
     app.run()
