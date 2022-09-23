@@ -8,5 +8,9 @@ def hello_world():  # put application's code here
     return 'Hello World!'
 
 
+def requete():
+    return 'requete'
+
+
 if __name__ == '__main__':
     app.run()
