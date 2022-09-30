@@ -31,8 +31,8 @@ def infosReleve(jsonRequest):
     heure = r['localObsDateTime'][11:19]
     return [temperature, humidte, pressionAtmos, date, heure]
 
-def resReq():
-    maRequete = requeteToJson('Lens')
+def resReq(nomVille):
+    maRequete = requeteToJson(nomVille)
     return [infosVille(maRequete), infosReleve(maRequete)]
 
 
