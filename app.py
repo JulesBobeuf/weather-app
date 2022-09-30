@@ -25,13 +25,13 @@ def infosVille(jsonRequest):
 def infosReleve(jsonRequest):
     r = jsonRequest['current_condition'][0]
     temperature = r['temp_C']
+    humidte = r['humidity']
+    pressionAtmos = r['pressure']
     date = r['localObsDateTime'][0:9]
     heure = r['localObsDateTime'][11:19]
-    return [temperature, date, heure]
+    return [temperature, humidte, pressionAtmos, date, heure]
 
-
-@app.route('/json')
-def affichage():
+def resReq():
     maRequete = requeteToJson('Lens')
     return [infosVille(maRequete), infosReleve(maRequete)]
 
