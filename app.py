@@ -25,7 +25,7 @@ def infosReleve(jsonRequest):
     temperature = r['temp_C']
     humidte = r['humidity']
     pressionAtmos = r['pressure']
-    date = r['localObsDateTime'][0:9]
+    date = r['localObsDateTime'][0:10]
     heure = r['localObsDateTime'][11:19]
     return [temperature, humidte, pressionAtmos, date, heure]
 
@@ -40,7 +40,8 @@ def demo():
     bd.createDatabase()
     bd.ajoutPays(tab[0][1])
     bd.ajoutVille(tab[0][0])
-    #bd.ajoutReleve(tab[1][0],tab[1][1],tab[1][2],tab[1][3],tab[0][0])
+    x = bd.getIdVille(tab[0][0])
+    bd.ajoutReleve(tab[1][0],tab[1][1],tab[1][2],tab[1][3],x)
     return tab
 
 

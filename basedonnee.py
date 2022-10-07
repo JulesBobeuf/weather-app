@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import Flask
 import sqlite3 as sql
 
@@ -14,7 +16,7 @@ def createDatabase():
     cur = con.cursor()
     cur.execute('''CREATE TABLE VILLE ( idVille INTEGER primary key AUTOINCREMENT, nomVille varchar);''')
     cur.execute('''CREATE TABLE PAYS ( idPays INTEGER primary key AUTOINCREMENT, nomPays varchar);''')
-    cur.execute('''CREATE TABLE RELEVE ( idReleve INTEGER primary key AUTOINCREMENT, temperature INT, humidite INT, pression INT, dateDuReleve date, idVille varchar REFERENCES VILLE(idVille));''')
+    cur.execute('''CREATE TABLE RELEVE ( idReleve INTEGER primary key AUTOINCREMENT, temperature INT, humidite INT, pression INT, dateDuReleve VARCHAR, idVille INTEGER REFERENCES VILLE(idVille));''')
     con.commit()
     con.close()
 
@@ -36,11 +38,12 @@ def ajoutPays(pays):
     con.commit()
     con.close()
 
-def ajoutReleve(temperature,humidite,pression,date,ville ):
-    data =     data = [(temperature,humidite,pression,date,getIdVille(ville))]
+def ajoutReleve(temperature,humidite,pression,dateDuReleve,ville ):
+    dateDuReleve = datetime.strptime(dateDuReleve, "%Y-%m-%d").date()
+    data = [temperature,humidite,pression,dateDuReleve,ville]
     con = sql.connect('bd.sqlite')
     cur = con.cursor()
-    cur.execute("INSERT INTO RELEVE(temperature,humidite,pression,dateDuReleve,idVille) VALUES (?)", data)
+    cur.execute("INSERT INTO RELEVE(temperature,humidite,pression,dateDuReleve,idVille) VALUES (?,?,?,?,?)", data)
     con.commit()
     con.close()
 
@@ -48,6 +51,7 @@ def getIdVille(ville):
     data = [(ville)]
     con = sql.connect('bd.sqlite')
     cur = con.cursor()
-    id = cur.execute("SELECT idVille FROM VILLE WHERE idVille=(?)", data)
+    cur.execute("SELECT idVille FROM VILLE WHERE nomVille=(?)", data)
+    id = cur.fetchone()
     con.close()
-    return id
+    return id[0]
