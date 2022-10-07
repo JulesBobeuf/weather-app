@@ -1,27 +1,11 @@
 from flask import Flask
 import requests
-
+import basedonnee as bd
 app = Flask(__name__)
 
 @app.route('/')
 def hello_world():  # put application's code here
     return 'Hello World!'
-
-def createDatabase():
-    con = sql.connect('bd.db')
-    cur = con.cursor()
-    cur.execute('''CREATE TABLE VILLE ( idVille int primary key, nomVille varchar, nomPays varchar);''')
-    cur.execute('''CREATE TABLE RELEVE ( idReleve int primary key, temperature int, dateDuReleve date, idVille varchar REFERENCES VILLE(idVille));''')
-    con.commit()
-    con.close()
-
-def ajoutVille(ville,pays):
-    values = "\'"+ville+"\',\'"+pays
-    con = sql.connect('bd.db')
-    cur = con.cursor()
-    cur.execute("INSERT INTO VILLE(nomVille,nomPays) VALUES ( " + values + ");")
-    con.commit()
-    con.close()
 
 def requeteToJson(ville):
     r = requests.get(f'https://wttr.in/{ville}?format=j1')
@@ -48,6 +32,16 @@ def infosReleve(jsonRequest):
 def resReq(nomVille):
     maRequete = requeteToJson(nomVille)
     return [infosVille(maRequete), infosReleve(maRequete)]
+
+@app.route('/demo')
+def demo():
+    tab = resReq("Montréal")
+    bd.deleteDatabase()
+    bd.createDatabase()
+    bd.ajoutPays(tab[0][1])
+    bd.ajoutVille(tab[0][0])
+    #bd.ajoutReleve(tab[1][0],tab[1][1],tab[1][2],tab[1][3],tab[0][0])
+    return tab
 
 
 if __name__ == '__main__':
