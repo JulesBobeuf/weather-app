@@ -1,6 +1,9 @@
+import time
 from flask import Flask
 import requests
 import basedonnee as bd
+import atexit
+from apscheduler.schedulers.background import BackgroundScheduler
 app = Flask(__name__)
 
 @app.route('/')
@@ -44,6 +47,42 @@ def demo():
     bd.ajoutReleve(tab[1][0],tab[1][1],tab[1][2],tab[1][3],x)
     return tab
 
+def resetDatabase():
+    bd.deleteDatabase()
+    bd.createDatabase()
+
+def getData(ville):
+    tab = resReq(ville)
+    y = bd.getVille(ville)
+    if not y:
+        bd.ajoutVille(tab[0][0])
+    x = bd.getPays(tab[0][1])
+    if not x:
+        bd.ajoutPays(tab[0][1])
+    x = bd.getIdVille(tab[0][0])
+    bd.ajoutReleve(tab[1][0], tab[1][1], tab[1][2], tab[1][3], x)
+
+def automatization():
+    getData("Montréal")
+    print("done")
+    getData("Roubaix")
+    print("done")
+    getData("Paris")
+    print("done")
+    getData("Strasbourg")
+    print("done")
+    getData("Marseille")
+    print("done")
+    getData("Lyon")
+    print("done Lyon")
+
+
+#resetDatabase()
+scheduler = BackgroundScheduler()
+scheduler.add_job(func=automatization, trigger="interval", seconds=15)
+scheduler.start()
+
+atexit.register(lambda: scheduler.shutdown())
 
 if __name__ == '__main__':
     app.run()
