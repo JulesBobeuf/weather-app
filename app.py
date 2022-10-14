@@ -52,34 +52,45 @@ def resetDatabase():
 
 def getData(ville):
     tab = resReq(ville)
+    if (tab[0][0] == "Montreal"):
+        ville = "Montreal"
+    elif (tab[0][0] == "Saint-Merri"):
+        ville = "Paris"
+    elif (tab[0][0] == "Strassbourg"):
+        ville = "Strasbourg"
+    elif (tab[0][0] == "Madrague De la Ville"):
+        ville = "Marseille"
+    elif (tab[0][0] == "Fourviere"):
+        ville = "Lyon"
+
     y = bd.getVille(ville)
     if not y:
-        bd.ajoutVille(tab[0][0])
+        bd.ajoutVille(ville)
     x = bd.getPays(tab[0][1])
     if not x:
         bd.ajoutPays(tab[0][1])
-    x = bd.getIdVille(tab[0][0])
+    x = bd.getIdVille(ville)
     bd.ajoutReleve(tab[1][0], tab[1][1], tab[1][2], tab[1][3], x)
 
 def automatization():
-    getData("Montréal")
-    print("done")
+    getData("Montreal")
+    print("done Montreal")
     getData("Roubaix")
-    print("done")
+    print("done Roubaix")
     getData("Paris")
-    print("done")
+    print("done Paris")
     getData("Strasbourg")
-    print("done")
+    print("done Strasbourg")
     getData("Marseille")
-    print("done")
-    getData("Lyon")
+    print("done Marseille")
+    getData("Lyon ")
     print("done Lyon")
 
-
+#print(bd.relevePourUneVille("Montreal")) A TESTER ( avec une route web maybe et une fonction + return
 #resetDatabase()
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=automatization, trigger="interval", seconds=15)
-scheduler.start()
+scheduler.add_job(func=automatization, trigger="interval", seconds=10)
+#scheduler.start()
 
 atexit.register(lambda: scheduler.shutdown())
 
