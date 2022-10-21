@@ -30,7 +30,6 @@ def ajoutVille(ville):
 
 
 def ajoutPays(pays):
-    print(pays)
     data = [(pays)]
     con = sql.connect('bd.sqlite')
     cur = con.cursor()
@@ -55,3 +54,44 @@ def getIdVille(ville):
     id = cur.fetchone()
     con.close()
     return id[0]
+
+def getIdPays(pays):
+    data = [(pays)]
+    con = sql.connect('bd.sqlite')
+    cur = con.cursor()
+    cur.execute("SELECT idPays FROM PAYS WHERE nomPays=(?)", data)
+    id = cur.fetchone()
+    con.close()
+    return id[0]
+
+def getVille(ville):
+    data = [(ville)]
+    con = sql.connect('bd.sqlite')
+    cur = con.cursor()
+    cur.execute("SELECT idVille FROM VILLE WHERE nomVille=(?)", data)
+    id = cur.fetchone()
+    con.close()
+    return id
+
+def getPays(pays):
+    data = [(pays)]
+    con = sql.connect('bd.sqlite')
+    cur = con.cursor()
+    cur.execute("SELECT idPays FROM PAYS WHERE nomPays=(?)", data)
+    id = cur.fetchone()
+    con.close()
+    return id
+
+def relevePourUneVille(ville):
+    data = [(ville)]
+    con = sql.connect('bd.sqlite')
+    cur = con.cursor()
+    cur.execute("SELECT idVille FROM VILLE WHERE nomVille=(?)", data)
+    id = cur.fetchone()
+    id = id[0]
+    idv=[(id)]
+    cur.execute("SELECT * FROM RELEVE WHERE idVille=(?)",idv)
+    tab = cur.fetchall()
+    con.close()
+    return tab
+

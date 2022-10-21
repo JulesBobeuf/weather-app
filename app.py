@@ -1,11 +1,14 @@
+import time
 from flask import Flask
 import requests
 import basedonnee as bd
+import atexit
+from apscheduler.schedulers.background import BackgroundScheduler
 app = Flask(__name__)
 
 @app.route('/')
 def hello_world():  # put application's code here
-    return 'Hello World!'
+    return 'PAGE ACCUEIL AVEC FORMULAIRE!'
 
 def requeteToJson(ville):
     r = requests.get(f'https://wttr.in/{ville}?format=j1')
@@ -18,7 +21,6 @@ def infosVille(jsonRequest):
     nomVille = r['areaName'][0]['value']
     nomPays = r['country'][0]['value']
     return [nomVille, nomPays]
-
 
 def infosReleve(jsonRequest):
     r = jsonRequest['current_condition'][0]
@@ -44,6 +46,53 @@ def demo():
     bd.ajoutReleve(tab[1][0],tab[1][1],tab[1][2],tab[1][3],x)
     return tab
 
+def resetDatabase():
+    bd.deleteDatabase()
+    bd.createDatabase()
+
+def getData(ville):
+    tab = resReq(ville)
+    if (tab[0][0] == "Montreal"):
+        ville = "Montreal"
+    elif (tab[0][0] == "Saint-Merri"):
+        ville = "Paris"
+    elif (tab[0][0] == "Strassbourg"):
+        ville = "Strasbourg"
+    elif (tab[0][0] == "Madrague De la Ville"):
+        ville = "Marseille"
+    elif (tab[0][0] == "Fourviere"):
+        ville = "Lyon"
+
+    y = bd.getVille(ville)
+    if not y:
+        bd.ajoutVille(ville)
+    x = bd.getPays(tab[0][1])
+    if not x:
+        bd.ajoutPays(tab[0][1])
+    x = bd.getIdVille(ville)
+    bd.ajoutReleve(tab[1][0], tab[1][1], tab[1][2], tab[1][3], x)
+
+def automatization():
+    getData("Montreal")
+    print("done Montreal")
+    getData("Roubaix")
+    print("done Roubaix")
+    getData("Paris")
+    print("done Paris")
+    getData("Strasbourg")
+    print("done Strasbourg")
+    getData("Marseille")
+    print("done Marseille")
+    getData("Lyon ")
+    print("done Lyon")
+
+#print(bd.relevePourUneVille("Montreal")) A TESTER ( avec une route web maybe et une fonction + return
+#resetDatabase()
+scheduler = BackgroundScheduler()
+scheduler.add_job(func=automatization, trigger="interval", seconds=10)
+#scheduler.start()
+
+atexit.register(lambda: scheduler.shutdown())
 
 if __name__ == '__main__':
     app.run()
