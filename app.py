@@ -1,14 +1,31 @@
+from datetime import datetime
+
+from flask import Flask, render_template
+import requests
+from flask_wtf import FlaskForm
+from wtforms import StringField, SelectField, DateField
+from wtforms.validators import DataRequired
 import time
-from flask import Flask
 import requests
 import basedonnee as bd
 import atexit
 from apscheduler.schedulers.background import BackgroundScheduler
-app = Flask(__name__)
 
-@app.route('/')
-def hello_world():  # put application's code here
-    return 'PAGE ACCUEIL AVEC FORMULAIRE!'
+app = Flask(__name__)
+app.secret_key = 'Ma clé secrète'
+
+
+@app.route('/', methods=['GET', 'POST'])
+def accueil():
+    form = CityForm()
+    if form.validate_on_submit():
+        nomVille = form.name.data
+        dateDebut = form.dateDebut.data
+        dateFin = form.dateFin.data
+        return render_template('test.html', nom=nomVille, dateDebut=dateDebut, dateFin=dateFin)
+
+    return render_template('form.html', form=form)
+
 
 def requeteToJson(ville):
     r = requests.get(f'https://wttr.in/{ville}?format=j1')
@@ -22,6 +39,7 @@ def infosVille(jsonRequest):
     nomPays = r['country'][0]['value']
     return [nomVille, nomPays]
 
+
 def infosReleve(jsonRequest):
     r = jsonRequest['current_condition'][0]
     temperature = r['temp_C']
@@ -30,6 +48,7 @@ def infosReleve(jsonRequest):
     date = r['localObsDateTime'][0:10]
     heure = r['localObsDateTime'][11:19]
     return [temperature, humidte, pressionAtmos, date, heure]
+
 
 def resReq(nomVille):
     maRequete = requeteToJson(nomVille)
@@ -93,6 +112,12 @@ scheduler.add_job(func=automatization, trigger="interval", seconds=10)
 #scheduler.start()
 
 atexit.register(lambda: scheduler.shutdown())
+
+class CityForm(FlaskForm):
+    name = SelectField(u'Villes :', choices=[('Roubaix', 'Roubaix'), ('Paris', 'Paris'), ('Strasbourg', 'Strasbourg'),
+                                             ('Lyon', 'Lyon'), ('Marseille', 'Marseille'), ('Montréal', 'Montréal')])
+    dateDebut = DateField('Date',format='%Y-%m-%d')
+    dateFin = DateField('Date',format='%Y-%m-%d',default=datetime.today())
 
 if __name__ == '__main__':
     app.run()

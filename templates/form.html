@@ -7,6 +7,27 @@
 <body>
 <h1>Formulaire</h1>
 
+<form method="POST" action="/">
+    {{ form.csrf_token }}
+
+    Villes : {{ form.name }}
+    <br>
+    Date début : {{ form.dateDebut }}
+    <br>
+    <i>Date fin :</i> {{ form.dateFin }}
+    <!--
+    <select name="villes" id="villes">
+        <option value="Roubaix">Roubaix</option>
+        <option value="Paris">Paris</option>
+        <option value="Strasbourg">Strasbourg</option>
+        <option value="Lyon">Lyon</option>
+        <option value="Marseille">Marseille</option>
+        <option value="Montréal">Montréal</option>
+
+    </select>
+    -->
+    <input type="submit" value="Go">
+</form>
 
 </body>
 </html>
