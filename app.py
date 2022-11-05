@@ -24,6 +24,8 @@ def accueil():
 
         tabReleveVille = bd.relevePourUneVille(nomVille)
         visualisationDonnees.temperatureVisu([x[4] for x in tabReleveVille], [x[1] for x in tabReleveVille])
+        visualisationDonnees.humiditeVisu([x[4] for x in tabReleveVille], [x[2] for x in tabReleveVille])
+        visualisationDonnees.pressionVisu([x[4] for x in tabReleveVille], [x[3] for x in tabReleveVille])
 
         return render_template('infosVille.html', nom=nomVille, dateDebut=dateDebut, dateFin=dateFin,
                                tabReleveVille=tabReleveVille)
