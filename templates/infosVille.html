@@ -19,7 +19,12 @@
 <hr>
 
 <p>Dates : {{ dateDebut }} au {{ dateFin }}</p>
-<p>Le Graphique : IMAGE {{ "graphique" }}</p><br>
+<figure>
+    <img src="{{ url_for('static', filename='/images/visualisation/temperatures.png') }}"
+         alt="graphique temperatures">
+    <figcaption>Graphique des températures</figcaption>
+</figure>
+
 
 <hr>
 

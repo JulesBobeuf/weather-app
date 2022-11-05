@@ -1,15 +1,14 @@
+import atexit
 from datetime import datetime
 
-from flask import Flask, render_template
 import requests
-from flask_wtf import FlaskForm
-from wtforms import StringField, SelectField, DateField
-from wtforms.validators import DataRequired
-import time
-import requests
-import basedonnee as bd
-import atexit
 from apscheduler.schedulers.background import BackgroundScheduler
+from flask import Flask, render_template
+from flask_wtf import FlaskForm
+from wtforms import SelectField, DateField
+
+import basedonnee as bd
+import visualisationDonnees
 
 app = Flask(__name__)
 app.secret_key = 'Ma clé secrète'
@@ -22,8 +21,12 @@ def accueil():
         nomVille = form.name.data
         dateDebut = form.dateDebut.data
         dateFin = form.dateFin.data
+
         tabReleveVille = bd.relevePourUneVille(nomVille)
-        return render_template('infosVille.html', nom=nomVille, dateDebut=dateDebut, dateFin=dateFin, tabReleveVille=tabReleveVille)
+        visualisationDonnees.temperatureVisu([x[4] for x in tabReleveVille], [x[1] for x in tabReleveVille])
+
+        return render_template('infosVille.html', nom=nomVille, dateDebut=dateDebut, dateFin=dateFin,
+                               tabReleveVille=tabReleveVille)
 
     return render_template('form.html', form=form)
 
@@ -55,20 +58,10 @@ def resReq(nomVille):
     maRequete = requeteToJson(nomVille)
     return [infosVille(maRequete), infosReleve(maRequete)]
 
-@app.route('/demo')
-def demo():
-    tab = resReq("Montréal")
-    bd.deleteDatabase()
-    bd.createDatabase()
-    bd.ajoutPays(tab[0][1])
-    bd.ajoutVille(tab[0][0])
-    x = bd.getIdVille(tab[0][0])
-    bd.ajoutReleve(tab[1][0],tab[1][1],tab[1][2],tab[1][3],x)
-    return tab
-
 def resetDatabase():
     bd.deleteDatabase()
     bd.createDatabase()
+
 
 def getData(ville):
     tab = resReq(ville)
@@ -92,6 +85,7 @@ def getData(ville):
     x = bd.getIdVille(ville)
     bd.ajoutReleve(tab[1][0], tab[1][1], tab[1][2], tab[1][3], x)
 
+
 def automatization():
     getData("Montreal")
     print("done Montreal")
@@ -106,19 +100,22 @@ def automatization():
     getData("Lyon ")
     print("done Lyon")
 
-#print(bd.relevePourUneVille("Montreal")) A TESTER ( avec une route web maybe et une fonction + return
-#resetDatabase()
+
+# print(bd.relevePourUneVille("Montreal")) A TESTER ( avec une route web maybe et une fonction + return
+# resetDatabase()
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=automatization, trigger="interval", seconds=10)
-#scheduler.start()
+# scheduler.start()
 
 atexit.register(lambda: scheduler.shutdown())
+
 
 class CityForm(FlaskForm):
     name = SelectField(u'Villes :', choices=[('Roubaix', 'Roubaix'), ('Paris', 'Paris'), ('Strasbourg', 'Strasbourg'),
                                              ('Lyon', 'Lyon'), ('Marseille', 'Marseille'), ('Montréal', 'Montréal')])
-    dateDebut = DateField('Date',format='%Y-%m-%d')
-    dateFin = DateField('Date',format='%Y-%m-%d',default=datetime.today())
+    dateDebut = DateField('Date', format='%Y-%m-%d')
+    dateFin = DateField('Date', format='%Y-%m-%d', default=datetime.today())
+
 
 if __name__ == '__main__':
     app.run()
