@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <link href={{ url_for('static',filename='styles/style.css') }} rel="stylesheet">
+    <meta charset="UTF-8">
+    <title>Ville {{ nom }}</title>
+</head>
+<body>
+
+<h1>Ville {{ nom }}</h1>
+
+<h2>Données les plus récentes</h2>
+
+<p>Heure : {{ tabReleveVille[0][4] }} TODO</p>
+<p>Température : {{ tabReleveVille[0][1] }}°C</p>
+<p>Humidité : {{ tabReleveVille[0][2] }}%</p>
+<p>Pression : {{ tabReleveVille[0][3] }}hPa</p>
+
+<hr>
+
+<p>Dates : {{ dateDebut }} au {{ dateFin }}</p>
+<p>Le Graphique : IMAGE {{ "graphique" }}</p><br>
+
+<hr>
+
+<table>
+    <thead>
+    <tr>
+        <th>Date du relevé</th>
+        <th>Température</th>
+        <th>Humidité</th>
+        <th>Pression</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    {% for i in range(0, tabReleveVille|length) %}
+        <tr>
+            <td>{{ tabReleveVille[i][4] }}</td>
+            <td>{{ tabReleveVille[i][1] }} °C</td>
+            <td>{{ tabReleveVille[i][2] }}%</td>
+            <td>{{ tabReleveVille[i][3] }} hPa</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+</body>
+</html>

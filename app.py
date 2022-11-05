@@ -22,7 +22,8 @@ def accueil():
         nomVille = form.name.data
         dateDebut = form.dateDebut.data
         dateFin = form.dateFin.data
-        return render_template('test.html', nom=nomVille, dateDebut=dateDebut, dateFin=dateFin)
+        tabReleveVille = bd.relevePourUneVille(nomVille)
+        return render_template('infosVille.html', nom=nomVille, dateDebut=dateDebut, dateFin=dateFin, tabReleveVille=tabReleveVille)
 
     return render_template('form.html', form=form)
 
