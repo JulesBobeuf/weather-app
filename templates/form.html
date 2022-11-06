@@ -1,33 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link href={{ url_for('static',filename='styles/style.css') }} rel="stylesheet">
     <meta charset="UTF-8">
-    <title>Formulaire</title>
+    <title>Accueil</title>
 </head>
 <body>
-<h1>Formulaire</h1>
+<div class="content">
 
-<form method="POST" action="/">
-    {{ form.csrf_token }}
+    <div class="container">
+        <h1 class="title is-1 has-text-centered">Formulaire</h1>
 
-    Villes : {{ form.name }}
-    <br>
-    Date début : {{ form.dateDebut }}
-    <br>
-    <i>Date fin :</i> {{ form.dateFin }}
-    <!--
-    <select name="villes" id="villes">
-        <option value="Roubaix">Roubaix</option>
-        <option value="Paris">Paris</option>
-        <option value="Strasbourg">Strasbourg</option>
-        <option value="Lyon">Lyon</option>
-        <option value="Marseille">Marseille</option>
-        <option value="Montréal">Montréal</option>
 
-    </select>
-    -->
-    <input type="submit" value="Go">
-</form>
+        <form class="field" method="POST" action="/">
+            {{ form.csrf_token }}
+            <div class="field">
+                <label class="label">Villes</label>
+                <div class="select">{{ form.name }}</div>
+            </div>
 
+            <div class="field">
+                <label class="label">Date de début</label>
+                {{ form.dateDebut }}
+            </div>
+
+            <div class="field">
+                <label class="label">Date de fin</label>
+                {{ form.dateFin }}
+            </div>
+
+            <input class="button is-info" type="submit" value="Go">
+        </form>
+
+    </div>
+
+</div>
 </body>
 </html>

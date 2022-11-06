@@ -1,5 +1,6 @@
+import atexit
 from datetime import datetime
-from flask import Flask, render_template
+from flask import Flask, render_template, app
 from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, DateField
 from wtforms.validators import DataRequired
@@ -8,27 +9,44 @@ import basedonnee as bd
 import atexit
 from apscheduler.schedulers.background import BackgroundScheduler
 import matplotlib.pyplot as plt
-app = Flask(__name__)
-app.secret_key = 'Ma clé secrète'
+import os
+
+import basedonnee as bd
+import visualisationDonnees
 
 
-@app.route('/', methods=['GET', 'POST'])
-def accueil():
-    form = CityForm()
-    if form.validate_on_submit():
-        nomVille = form.name.data
-        dateDebut = form.dateDebut.data
-        dateFin = form.dateFin.data
-        return render_template('test.html', nom=nomVille, dateDebut=dateDebut, dateFin=dateFin)
+def create_app(test_config=None):
+    app = Flask(__name__, instance_relative_config=True)
 
-    return render_template('form.html', form=form)
+    if test_config is None:
+        app.config.from_mapping(
+            SECRET_KEY=os.environ.get('SECRET_KEY'),
+        )
+    else:
+        app.config.from_mapping(test_config)
 
+    @app.route('/', methods=['GET', 'POST'])
+    def accueil():
+        form = CityForm()
+        if form.validate_on_submit():
+            nomVille = form.name.data
+            dateDebut = form.dateDebut.data
+            dateFin = form.dateFin.data
+
+            tabReleveVille = bd.relevePourUneVille(nomVille)
+            visualisationDonnees.temperatureVisu([x[4] for x in tabReleveVille], [x[1] for x in tabReleveVille])
+            visualisationDonnees.humiditeVisu([x[4] for x in tabReleveVille], [x[2] for x in tabReleveVille])
+            visualisationDonnees.pressionVisu([x[4] for x in tabReleveVille], [x[3] for x in tabReleveVille])
+
+            return render_template('infosVille.html', nom=nomVille, dateDebut=dateDebut, dateFin=dateFin,
+                                   tabReleveVille=tabReleveVille)
+
+        return render_template('form.html', form=form)
 
 def requeteToJson(ville):
     r = requests.get(f'https://wttr.in/{ville}?format=j1')
     infosJson = r.json()
     return infosJson
-
 
 def infosVille(jsonRequest):
     r = jsonRequest['nearest_area'][0]
@@ -36,16 +54,14 @@ def infosVille(jsonRequest):
     nomPays = r['country'][0]['value']
     return [nomVille, nomPays]
 
-
 def infosReleve(jsonRequest):
     r = jsonRequest['current_condition'][0]
     temperature = r['temp_C']
-    humidte = r['humidity']
+    humidite = r['humidity']
     pressionAtmos = r['pressure']
     date = r['localObsDateTime'][0:10]
     heure = r['localObsDateTime'][11:19]
-    return [temperature, humidte, pressionAtmos, date, heure]
-
+    return [temperature, humidite, pressionAtmos, date, heure]
 
 def resReq(nomVille):
     maRequete = requeteToJson(nomVille)
@@ -53,7 +69,7 @@ def resReq(nomVille):
 
 @app.route('/demo')
 def demo():
-    tab = resReq("Montréal")
+    tab = bd.resReq("Montréal")
     bd.deleteDatabase()
     bd.createDatabase()
     bd.ajoutPays(tab[0][1])
@@ -61,10 +77,9 @@ def demo():
     x = bd.getIdVille(tab[0][0])
     bd.ajoutReleve(tab[1][0],tab[1][1],tab[1][2],tab[1][3],tab[1][4],x)
     return tab
-
-def resetDatabase():
-    bd.deleteDatabase()
-    bd.createDatabase()
+    def resetDatabase():
+        bd.deleteDatabase()
+        bd.createDatabase()
 
 def getData(ville):
     tab = resReq(ville)
@@ -75,10 +90,9 @@ def getData(ville):
     elif (tab[0][0] == "Strassbourg"):
         ville = "Strasbourg"
     elif (tab[0][0] == "Madrague De la Ville"):
-        ville = "Marseille"
+         ville = "Marseille"
     elif (tab[0][0] == "Fourviere"):
         ville = "Lyon"
-
     y = bd.getVille(ville)
     if not y:
         bd.ajoutVille(ville)
@@ -130,14 +144,14 @@ def graph():
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=automatization, trigger="interval", seconds=300)
 scheduler.start()
-
 atexit.register(lambda: scheduler.shutdown())
 
-class CityForm(FlaskForm):
-    name = SelectField(u'Villes :', choices=[('Roubaix', 'Roubaix'), ('Paris', 'Paris'), ('Strasbourg', 'Strasbourg'),
-                                             ('Lyon', 'Lyon'), ('Marseille', 'Marseille'), ('Montréal', 'Montréal')])
-    dateDebut = DateField('Date',format='%Y-%m-%d')
-    dateFin = DateField('Date',format='%Y-%m-%d',default=datetime.today())
 
-if __name__ == '__main__':
-    app.run()
+class CityForm(FlaskForm):
+    name = SelectField(u'Villes :',
+                       choices=[('Roubaix', 'Roubaix'), ('Paris', 'Paris'), ('Strasbourg', 'Strasbourg'),
+                                ('Lyon', 'Lyon'), ('Marseille', 'Marseille'), ('Montréal', 'Montréal')])
+    dateDebut = DateField('Date', format='%Y-%m-%d')
+    dateFin = DateField('Date', format='%Y-%m-%d', default=datetime.today())
+    return app
+
