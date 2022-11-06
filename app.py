@@ -1,16 +1,13 @@
 from datetime import datetime
-
 from flask import Flask, render_template
-import requests
 from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, DateField
 from wtforms.validators import DataRequired
-import time
 import requests
 import basedonnee as bd
 import atexit
 from apscheduler.schedulers.background import BackgroundScheduler
-
+import matplotlib.pyplot as plt
 app = Flask(__name__)
 app.secret_key = 'Ma clé secrète'
 
@@ -62,7 +59,7 @@ def demo():
     bd.ajoutPays(tab[0][1])
     bd.ajoutVille(tab[0][0])
     x = bd.getIdVille(tab[0][0])
-    bd.ajoutReleve(tab[1][0],tab[1][1],tab[1][2],tab[1][3],x)
+    bd.ajoutReleve(tab[1][0],tab[1][1],tab[1][2],tab[1][3],tab[1][4],x)
     return tab
 
 def resetDatabase():
@@ -89,7 +86,7 @@ def getData(ville):
     if not x:
         bd.ajoutPays(tab[0][1])
     x = bd.getIdVille(ville)
-    bd.ajoutReleve(tab[1][0], tab[1][1], tab[1][2], tab[1][3], x)
+    bd.ajoutReleve(tab[1][0], tab[1][1], tab[1][2], tab[1][3], tab[1][4], x)
 
 def automatization():
     getData("Montreal")
@@ -107,9 +104,32 @@ def automatization():
 
 #print(bd.relevePourUneVille("Montreal")) A TESTER ( avec une route web maybe et une fonction + return
 #resetDatabase()
+
+@app.route('/test', methods=['GET', 'POST'])
+def test():
+    tab = bd.relevePourUneVilleEtDate('Roubaix','2022-10-10','2022-10-15')
+    print(tab[0][0],tab[0][1],tab)
+    return "x"
+
+@app.route('/test2', methods=['GET', 'POST'])
+def graph():
+    tab = bd.relevePourUneVilleEtDate('Roubaix','2022-10-10','2022-10-30')
+
+    plt.xlabel("time")
+    plt.ylabel("temperature")
+    temperature=[]
+    datereleve=[]
+    for i in range(len(tab)):
+        temperature.append(tab[i][1])
+        datereleve.append(tab[i][5])
+    plt.plot(datereleve,temperature)
+    plt.show()
+    return "x"
+
+
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=automatization, trigger="interval", seconds=10)
-#scheduler.start()
+scheduler.add_job(func=automatization, trigger="interval", seconds=300)
+scheduler.start()
 
 atexit.register(lambda: scheduler.shutdown())
 
