@@ -161,7 +161,7 @@ def create_app(test_config=None):
         dateFin = DateField('Date', format='%Y-%m-%d', default=datetime.today())
 
     scheduler = BackgroundScheduler()
-    scheduler.add_job(func=automatization, trigger="interval", seconds=300)
+    scheduler.add_job(func=automatization, trigger="interval", seconds=3600)
     scheduler.start()
     atexit.register(lambda: scheduler.shutdown())
 
