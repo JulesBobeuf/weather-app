@@ -1,123 +1,124 @@
+import atexit
 from datetime import datetime
 
-from flask import Flask, render_template
 import requests
-from flask_wtf import FlaskForm
-from wtforms import StringField, SelectField, DateField
-from wtforms.validators import DataRequired
-import time
-import requests
-import basedonnee as bd
-import atexit
 from apscheduler.schedulers.background import BackgroundScheduler
+from flask import Flask, render_template
+from flask_wtf import FlaskForm
+from wtforms import SelectField, DateField
+import os
 
-app = Flask(__name__)
-app.secret_key = 'Ma clé secrète'
-
-
-@app.route('/', methods=['GET', 'POST'])
-def accueil():
-    form = CityForm()
-    if form.validate_on_submit():
-        nomVille = form.name.data
-        dateDebut = form.dateDebut.data
-        dateFin = form.dateFin.data
-        return render_template('test.html', nom=nomVille, dateDebut=dateDebut, dateFin=dateFin)
-
-    return render_template('form.html', form=form)
+import basedonnee as bd
+import visualisationDonnees
 
 
-def requeteToJson(ville):
-    r = requests.get(f'https://wttr.in/{ville}?format=j1')
-    infosJson = r.json()
-    return infosJson
+def create_app(test_config=None):
+    app = Flask(__name__, instance_relative_config=True)
 
+    if test_config is None:
+        app.config.from_mapping(
+            SECRET_KEY=os.environ.get('SECRET_KEY'),
+        )
+    else:
+        app.config.from_mapping(test_config)
 
-def infosVille(jsonRequest):
-    r = jsonRequest['nearest_area'][0]
-    nomVille = r['areaName'][0]['value']
-    nomPays = r['country'][0]['value']
-    return [nomVille, nomPays]
+    @app.route('/', methods=['GET', 'POST'])
+    def accueil():
+        form = CityForm()
+        if form.validate_on_submit():
+            nomVille = form.name.data
+            dateDebut = form.dateDebut.data
+            dateFin = form.dateFin.data
 
+            tabReleveVille = bd.relevePourUneVille(nomVille)
+            visualisationDonnees.temperatureVisu([x[4] for x in tabReleveVille], [x[1] for x in tabReleveVille])
+            visualisationDonnees.humiditeVisu([x[4] for x in tabReleveVille], [x[2] for x in tabReleveVille])
+            visualisationDonnees.pressionVisu([x[4] for x in tabReleveVille], [x[3] for x in tabReleveVille])
 
-def infosReleve(jsonRequest):
-    r = jsonRequest['current_condition'][0]
-    temperature = r['temp_C']
-    humidte = r['humidity']
-    pressionAtmos = r['pressure']
-    date = r['localObsDateTime'][0:10]
-    heure = r['localObsDateTime'][11:19]
-    return [temperature, humidte, pressionAtmos, date, heure]
+            return render_template('infosVille.html', nom=nomVille, dateDebut=dateDebut, dateFin=dateFin,
+                                   tabReleveVille=tabReleveVille)
 
+        return render_template('form.html', form=form)
 
-def resReq(nomVille):
-    maRequete = requeteToJson(nomVille)
-    return [infosVille(maRequete), infosReleve(maRequete)]
+    def requeteToJson(ville):
+        r = requests.get(f'https://wttr.in/{ville}?format=j1')
+        infosJson = r.json()
+        return infosJson
 
-@app.route('/demo')
-def demo():
-    tab = resReq("Montréal")
-    bd.deleteDatabase()
-    bd.createDatabase()
-    bd.ajoutPays(tab[0][1])
-    bd.ajoutVille(tab[0][0])
-    x = bd.getIdVille(tab[0][0])
-    bd.ajoutReleve(tab[1][0],tab[1][1],tab[1][2],tab[1][3],x)
-    return tab
+    def infosVille(jsonRequest):
+        r = jsonRequest['nearest_area'][0]
+        nomVille = r['areaName'][0]['value']
+        nomPays = r['country'][0]['value']
+        return [nomVille, nomPays]
 
-def resetDatabase():
-    bd.deleteDatabase()
-    bd.createDatabase()
+    def infosReleve(jsonRequest):
+        r = jsonRequest['current_condition'][0]
+        temperature = r['temp_C']
+        humidte = r['humidity']
+        pressionAtmos = r['pressure']
+        date = r['localObsDateTime'][0:10]
+        heure = r['localObsDateTime'][11:19]
+        return [temperature, humidte, pressionAtmos, date, heure]
 
-def getData(ville):
-    tab = resReq(ville)
-    if (tab[0][0] == "Montreal"):
-        ville = "Montreal"
-    elif (tab[0][0] == "Saint-Merri"):
-        ville = "Paris"
-    elif (tab[0][0] == "Strassbourg"):
-        ville = "Strasbourg"
-    elif (tab[0][0] == "Madrague De la Ville"):
-        ville = "Marseille"
-    elif (tab[0][0] == "Fourviere"):
-        ville = "Lyon"
+    def resReq(nomVille):
+        maRequete = requeteToJson(nomVille)
+        return [infosVille(maRequete), infosReleve(maRequete)]
 
-    y = bd.getVille(ville)
-    if not y:
-        bd.ajoutVille(ville)
-    x = bd.getPays(tab[0][1])
-    if not x:
-        bd.ajoutPays(tab[0][1])
-    x = bd.getIdVille(ville)
-    bd.ajoutReleve(tab[1][0], tab[1][1], tab[1][2], tab[1][3], x)
+    def resetDatabase():
+        bd.deleteDatabase()
+        bd.createDatabase()
 
-def automatization():
-    getData("Montreal")
-    print("done Montreal")
-    getData("Roubaix")
-    print("done Roubaix")
-    getData("Paris")
-    print("done Paris")
-    getData("Strasbourg")
-    print("done Strasbourg")
-    getData("Marseille")
-    print("done Marseille")
-    getData("Lyon ")
-    print("done Lyon")
+    def getData(ville):
+        tab = resReq(ville)
+        if (tab[0][0] == "Montreal"):
+            ville = "Montreal"
+        elif (tab[0][0] == "Saint-Merri"):
+            ville = "Paris"
+        elif (tab[0][0] == "Strassbourg"):
+            ville = "Strasbourg"
+        elif (tab[0][0] == "Madrague De la Ville"):
+            ville = "Marseille"
+        elif (tab[0][0] == "Fourviere"):
+            ville = "Lyon"
 
-#print(bd.relevePourUneVille("Montreal")) A TESTER ( avec une route web maybe et une fonction + return
-#resetDatabase()
-scheduler = BackgroundScheduler()
-scheduler.add_job(func=automatization, trigger="interval", seconds=10)
-#scheduler.start()
+        y = bd.getVille(ville)
+        if not y:
+            bd.ajoutVille(ville)
+        x = bd.getPays(tab[0][1])
+        if not x:
+            bd.ajoutPays(tab[0][1])
+        x = bd.getIdVille(ville)
+        bd.ajoutReleve(tab[1][0], tab[1][1], tab[1][2], tab[1][3], x)
 
-atexit.register(lambda: scheduler.shutdown())
+    def automatization():
+        getData("Montreal")
+        print("done Montreal")
+        getData("Roubaix")
+        print("done Roubaix")
+        getData("Paris")
+        print("done Paris")
+        getData("Strasbourg")
+        print("done Strasbourg")
+        getData("Marseille")
+        print("done Marseille")
+        getData("Lyon ")
+        print("done Lyon")
 
-class CityForm(FlaskForm):
-    name = SelectField(u'Villes :', choices=[('Roubaix', 'Roubaix'), ('Paris', 'Paris'), ('Strasbourg', 'Strasbourg'),
-                                             ('Lyon', 'Lyon'), ('Marseille', 'Marseille'), ('Montréal', 'Montréal')])
-    dateDebut = DateField('Date',format='%Y-%m-%d')
-    dateFin = DateField('Date',format='%Y-%m-%d',default=datetime.today())
+    # print(bd.relevePourUneVille("Montreal")) A TESTER ( avec une route web maybe et une fonction + return
+    # resetDatabase()
+    """
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(func=automatization, trigger="interval", seconds=10)
+    # scheduler.start()
 
-if __name__ == '__main__':
-    app.run()
+    atexit.register(lambda: scheduler.shutdown())
+    """
+
+    class CityForm(FlaskForm):
+        name = SelectField(u'Villes :',
+                           choices=[('Roubaix', 'Roubaix'), ('Paris', 'Paris'), ('Strasbourg', 'Strasbourg'),
+                                    ('Lyon', 'Lyon'), ('Marseille', 'Marseille'), ('Montréal', 'Montréal')])
+        dateDebut = DateField('Date', format='%Y-%m-%d')
+        dateFin = DateField('Date', format='%Y-%m-%d', default=datetime.today())
+
+    return app
