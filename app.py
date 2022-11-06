@@ -1,11 +1,14 @@
 import atexit
 from datetime import datetime
-
-import requests
-from apscheduler.schedulers.background import BackgroundScheduler
-from flask import Flask, render_template
+from flask import Flask, render_template, app
 from flask_wtf import FlaskForm
-from wtforms import SelectField, DateField
+from wtforms import StringField, SelectField, DateField
+from wtforms.validators import DataRequired
+import requests
+import basedonnee as bd
+import atexit
+from apscheduler.schedulers.background import BackgroundScheduler
+import matplotlib.pyplot as plt
 import os
 
 import basedonnee as bd
@@ -22,6 +25,7 @@ def create_app(test_config=None):
     else:
         app.config.from_mapping(test_config)
 
+
     @app.route('/', methods=['GET', 'POST'])
     def accueil():
         form = CityForm()
@@ -30,7 +34,7 @@ def create_app(test_config=None):
             dateDebut = form.dateDebut.data
             dateFin = form.dateFin.data
 
-            tabReleveVille = bd.relevePourUneVille(nomVille)
+            tabReleveVille = bd.relevePourUneVilleEtDate(nomVille,dateDebut,dateFin)
             visualisationDonnees.temperatureVisu([x[4] for x in tabReleveVille], [x[1] for x in tabReleveVille])
             visualisationDonnees.humiditeVisu([x[4] for x in tabReleveVille], [x[2] for x in tabReleveVille])
             visualisationDonnees.pressionVisu([x[4] for x in tabReleveVille], [x[3] for x in tabReleveVille])
@@ -54,16 +58,26 @@ def create_app(test_config=None):
     def infosReleve(jsonRequest):
         r = jsonRequest['current_condition'][0]
         temperature = r['temp_C']
-        humidte = r['humidity']
+        humidite = r['humidity']
         pressionAtmos = r['pressure']
         date = r['localObsDateTime'][0:10]
         heure = r['localObsDateTime'][11:19]
-        return [temperature, humidte, pressionAtmos, date, heure]
+        return [temperature, humidite, pressionAtmos, date, heure]
 
     def resReq(nomVille):
         maRequete = requeteToJson(nomVille)
         return [infosVille(maRequete), infosReleve(maRequete)]
 
+    @app.route('/demo')
+    def demo():
+        tab = bd.resReq("Montréal")
+        bd.deleteDatabase()
+        bd.createDatabase()
+        bd.ajoutPays(tab[0][1])
+        bd.ajoutVille(tab[0][0])
+        x = bd.getIdVille(tab[0][0])
+        bd.ajoutReleve(tab[1][0],tab[1][1],tab[1][2],tab[1][3],tab[1][4],x)
+        return tab
     def resetDatabase():
         bd.deleteDatabase()
         bd.createDatabase()
@@ -77,10 +91,9 @@ def create_app(test_config=None):
         elif (tab[0][0] == "Strassbourg"):
             ville = "Strasbourg"
         elif (tab[0][0] == "Madrague De la Ville"):
-            ville = "Marseille"
+             ville = "Marseille"
         elif (tab[0][0] == "Fourviere"):
             ville = "Lyon"
-
         y = bd.getVille(ville)
         if not y:
             bd.ajoutVille(ville)
@@ -88,7 +101,8 @@ def create_app(test_config=None):
         if not x:
             bd.ajoutPays(tab[0][1])
         x = bd.getIdVille(ville)
-        bd.ajoutReleve(tab[1][0], tab[1][1], tab[1][2], tab[1][3], x)
+        bd.ajoutReleve(tab[1][0], tab[1][1], tab[1][2], tab[1][3], tab[1][4], x)
+        logger(ville,tab[1][3], tab[1][4])
 
     def automatization():
         getData("Montreal")
@@ -101,24 +115,48 @@ def create_app(test_config=None):
         print("done Strasbourg")
         getData("Marseille")
         print("done Marseille")
-        getData("Lyon ")
+        getData("Lyon")
         print("done Lyon")
 
-    # print(bd.relevePourUneVille("Montreal")) A TESTER ( avec une route web maybe et une fonction + return
-    # resetDatabase()
-    """
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(func=automatization, trigger="interval", seconds=10)
-    # scheduler.start()
+    @app.route('/test', methods=['GET', 'POST'])
+    def test():
+        tab = bd.relevePourUneVilleEtDate('Roubaix','2022-10-10','2022-10-15')
+        print(tab[0][0],tab[0][1],tab)
+        return "x"
 
-    atexit.register(lambda: scheduler.shutdown())
-    """
+    @app.route('/test2', methods=['GET', 'POST'])
+    def graph():
+        tab = bd.relevePourUneVilleEtDate('Roubaix','2022-10-10','2022-10-30')
+
+        plt.xlabel("time")
+        plt.ylabel("temperature")
+        temperature=[]
+        datereleve=[]
+        for i in range(len(tab)):
+            temperature.append(tab[i][1])
+            datereleve.append(tab[i][5])
+        plt.plot(datereleve,temperature)
+        plt.show()
+        return "x"
+
+    def logger(ville,jour,heure):
+        val = "\nData added for " + str(ville) + " at " + str(jour) + " " + str(heure) + " local time. "
+        with open('logs.txt','a') as f:
+            f.write(val)
+
 
     class CityForm(FlaskForm):
         name = SelectField(u'Villes :',
                            choices=[('Roubaix', 'Roubaix'), ('Paris', 'Paris'), ('Strasbourg', 'Strasbourg'),
-                                    ('Lyon', 'Lyon'), ('Marseille', 'Marseille'), ('Montréal', 'Montréal')])
+                                    ('Lyon', 'Lyon'), ('Marseille', 'Marseille'), ('Montreal', 'Montreal')])
         dateDebut = DateField('Date', format='%Y-%m-%d')
         dateFin = DateField('Date', format='%Y-%m-%d', default=datetime.today())
 
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(func=automatization, trigger="interval", seconds=300)
+    scheduler.start()
+    atexit.register(lambda: scheduler.shutdown())
+
     return app
+
+
