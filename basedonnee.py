@@ -38,7 +38,7 @@ def ajoutPays(pays):
     con.close()
 
 def ajoutReleve(temperature,humidite,pression,dateDuReleve,heure,ville ):
-    dateDuReleve = datetime.strptime(dateDuReleve, "%Y-%m-%d").date()
+    dateDuReleve = datetime.strptime(str(dateDuReleve), "%Y-%m-%d").date()
     data = [temperature,humidite,pression,dateDuReleve,heure,ville]
     con = sql.connect('bd.sqlite')
     cur = con.cursor()
@@ -97,8 +97,8 @@ def relevePourUneVille(ville):
 
 def relevePourUneVilleEtDate(ville,dateDebut,dateFin):
     data = [(ville)]
-    dateDebut = dateDuReleve = datetime.strptime(dateDebut, "%Y-%m-%d").date()
-    dateFin = dateDuReleve = datetime.strptime(dateFin, "%Y-%m-%d").date()
+    dateDebut = datetime.strptime(str(dateDebut), "%Y-%m-%d").date()
+    dateFin = datetime.strptime(str(dateFin), "%Y-%m-%d").date()
     con = sql.connect('bd.sqlite')
     cur = con.cursor()
     cur.execute("SELECT idVille FROM VILLE WHERE nomVille=(?)", data)
