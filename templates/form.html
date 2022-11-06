@@ -1,12 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Formulaire</title>
-</head>
-<body>
-<h1>Formulaire</h1>
+{% extends "base.html" %}
 
+{% block title %}Formulaire{% endblock %}
+{% block content %}
+    <h1 class="title is-1 has-text-centered">Formulaire</h1>
+    <form class="field" method="POST" action="/formulaire">
+        {{ form.csrf_token }}
+        <div class="field">
+            <label class="label">Villes</label>
+            <div class="select">{{ form.name }}</div>
+        </div>
 
-</body>
-</html>
+        <div class="field">
+            <label class="label">Date de début*</label>
+            {{ form.dateDebut }}
+        </div>
+
+        <div class="field">
+            <label class="label">Date de fin</label>
+            {{ form.dateFin }}
+        </div>
+
+        <input class="button is-info" type="submit" value="Go">
+    </form>
+{% endblock %}

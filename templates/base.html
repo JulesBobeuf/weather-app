@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <link href={{ url_for('static',filename='styles/style.css') }} rel="stylesheet">
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}</title>
+</head>
+<body>
+
+<nav class="navbar" role="navigation">
+    <div class="container">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="/">
+                <span class="icon"><i class="fas fa-home"></i></span>
+                Accueil
+            </a>
+        </div>
+        <div class="navbar-menu">
+            <div class="navbar-start">
+                <a class="navbar-item" href="/formulaire">
+                    Formulaire
+                </a>
+                <a class="navbar-item" href="/contact">
+                    Contact
+                </a>
+            </div>
+        </div>
+
+    </div>
+</nav>
+<hr>
+<div class="content">
+    <div class="container">
+        {% block content %}
+        {% endblock %}
+    </div>
+</div>
+<footer class="footer">
+
+</footer>
+</body>
+</html>

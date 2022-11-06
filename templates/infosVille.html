@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Ville : {{ nom }}{% endblock %}
+{% block content %}
+    <h1 class="title is-1 has-text-centered">Ville : {{ nom }}</h1>
+
+    <h3 class="title is-3">Dernières données récupérées :</h3>
+
+    <nav class="level">
+        <div class="level-item has-text-centered">
+            <div>
+                <p><span class="icon"><i class="fas fa-clock"></i></span></p>
+                <p>Date : {{ donneesRecentes[4] }} | {{ donneesRecentes[5] }}</p>
+            </div>
+        </div>
+        <div class="level-item has-text-centered">
+            <div>
+                <p><span class="icon"><i class="fas fa-thermometer-half"></i></span></p>
+                <p>Température : {{ donneesRecentes[1] }}°C</p>
+            </div>
+        </div>
+        <div class="level-item has-text-centered">
+            <div>
+                <p><span class="icon"><i class="fas fa-percent"></i></span></p>
+                <p>Humidité : {{ donneesRecentes[2] }}%</p>
+            </div>
+        </div>
+        <div class="level-item has-text-centered">
+            <div>
+                <p><span class="icon"><i class="fas fa-weight-hanging"></i></span></p>
+                <p>Pression : {{ donneesRecentes[3] }}hPa</p>
+            </div>
+        </div>
+    </nav>
+
+    <hr>
+
+    {% if tabReleveVille|length == 0 -%}
+        <p>Aucunes données correspondantes du {{ dateDebut }} au {{ dateFin }}</p>
+    {% else -%}
+        <h3 class="title is-3">Graphiques | {{ dateDebut }} <---> {{ dateFin }} :</h3>
+
+        <figure class="is-centered">
+            <figcaption class="subtitle has-text-centered is-5 graphSubtitle">Graphique des températures
+            </figcaption>
+            <img src="{{ url_for('static', filename='/images/visualisation/temperatures.png') }}"
+                 alt="graphique temperatures">
+        </figure>
+
+        <hr class="sepGraph">
+
+        <figure class="is-centered">
+            <figcaption class="subtitle has-text-centered is-5 graphSubtitle">Graphique du taux d'humidité
+            </figcaption>
+            <img src="{{ url_for('static', filename='/images/visualisation/humidite.png') }}"
+                 alt="graphique taux humidite">
+        </figure>
+
+        <hr class="sepGraph">
+
+        <figure class="is-centered">
+            <figcaption class="subtitle has-text-centered is-5 graphSubtitle">Graphique de la pression
+                atmosphérique
+            </figcaption>
+            <img src="{{ url_for('static', filename='/images/visualisation/pression.png') }}"
+                 alt="graphique pression atmospherique">
+        </figure>
+
+        <hr>
+
+        <h3 class="title is-3">Tableau | {{ dateDebut }} <---> {{ dateFin }} :</h3>
+
+        <table class="table is-bordered is-striped is-hoverable is-fullwidth">
+            <thead>
+            <tr>
+                <th>Date du relevé</th>
+                <th>Température</th>
+                <th>Humidité</th>
+                <th>Pression</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            {% for i in range(0, tabReleveVille|length) %}
+                <tr>
+                    <td>{{ tabReleveVille[i][4] }} | {{ tabReleveVille[i][5] }}</td>
+                    <td>{{ tabReleveVille[i][1] }} °C</td>
+                    <td>{{ tabReleveVille[i][2] }}%</td>
+                    <td>{{ tabReleveVille[i][3] }} hPa</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+    {% endif %}
+{% endblock %}
