@@ -25,8 +25,15 @@ def create_app(test_config=None):
     else:
         app.config.from_mapping(test_config)
 
+    @app.route('/')
+    def index():
+        return render_template('index.html')
 
-    @app.route('/', methods=['GET', 'POST'])
+    @app.route('/contact')
+    def contact():
+        return render_template('contact.html')
+
+    @app.route('/formulaire', methods=['GET', 'POST'])
     def accueil():
         form = CityForm()
         if form.validate_on_submit():
@@ -34,13 +41,14 @@ def create_app(test_config=None):
             dateDebut = form.dateDebut.data
             dateFin = form.dateFin.data
 
-            tabReleveVille = bd.relevePourUneVilleEtDate(nomVille,dateDebut,dateFin)
+            donneesRecentes = bd.relevePourUneVille(nomVille)
+            tabReleveVille = bd.relevePourUneVilleEtDate(nomVille, dateDebut, dateFin)
             visualisationDonnees.temperatureVisu([x[4] for x in tabReleveVille], [x[1] for x in tabReleveVille])
             visualisationDonnees.humiditeVisu([x[4] for x in tabReleveVille], [x[2] for x in tabReleveVille])
             visualisationDonnees.pressionVisu([x[4] for x in tabReleveVille], [x[3] for x in tabReleveVille])
 
             return render_template('infosVille.html', nom=nomVille, dateDebut=dateDebut, dateFin=dateFin,
-                                   tabReleveVille=tabReleveVille)
+                                   tabReleveVille=tabReleveVille, donneesRecentes=donneesRecentes[-1])
 
         return render_template('form.html', form=form)
 
@@ -76,8 +84,9 @@ def create_app(test_config=None):
         bd.ajoutPays(tab[0][1])
         bd.ajoutVille(tab[0][0])
         x = bd.getIdVille(tab[0][0])
-        bd.ajoutReleve(tab[1][0],tab[1][1],tab[1][2],tab[1][3],tab[1][4],x)
+        bd.ajoutReleve(tab[1][0], tab[1][1], tab[1][2], tab[1][3], tab[1][4], x)
         return tab
+
     def resetDatabase():
         bd.deleteDatabase()
         bd.createDatabase()
@@ -91,7 +100,7 @@ def create_app(test_config=None):
         elif (tab[0][0] == "Strassbourg"):
             ville = "Strasbourg"
         elif (tab[0][0] == "Madrague De la Ville"):
-             ville = "Marseille"
+            ville = "Marseille"
         elif (tab[0][0] == "Fourviere"):
             ville = "Lyon"
         y = bd.getVille(ville)
@@ -102,7 +111,7 @@ def create_app(test_config=None):
             bd.ajoutPays(tab[0][1])
         x = bd.getIdVille(ville)
         bd.ajoutReleve(tab[1][0], tab[1][1], tab[1][2], tab[1][3], tab[1][4], x)
-        logger(ville,tab[1][3], tab[1][4])
+        logger(ville, tab[1][3], tab[1][4])
 
     def automatization():
         getData("Montreal")
@@ -120,30 +129,29 @@ def create_app(test_config=None):
 
     @app.route('/test', methods=['GET', 'POST'])
     def test():
-        tab = bd.relevePourUneVilleEtDate('Roubaix','2022-10-10','2022-10-15')
-        print(tab[0][0],tab[0][1],tab)
+        tab = bd.relevePourUneVilleEtDate('Roubaix', '2022-10-10', '2022-10-15')
+        print(tab[0][0], tab[0][1], tab)
         return "x"
 
     @app.route('/test2', methods=['GET', 'POST'])
     def graph():
-        tab = bd.relevePourUneVilleEtDate('Roubaix','2022-10-10','2022-10-30')
+        tab = bd.relevePourUneVilleEtDate('Roubaix', '2022-10-10', '2022-10-30')
 
         plt.xlabel("time")
         plt.ylabel("temperature")
-        temperature=[]
-        datereleve=[]
+        temperature = []
+        datereleve = []
         for i in range(len(tab)):
             temperature.append(tab[i][1])
             datereleve.append(tab[i][5])
-        plt.plot(datereleve,temperature)
+        plt.plot(datereleve, temperature)
         plt.show()
         return "x"
 
-    def logger(ville,jour,heure):
+    def logger(ville, jour, heure):
         val = "\nData added for " + str(ville) + " at " + str(jour) + " " + str(heure) + " local time. "
-        with open('logs.txt','a') as f:
+        with open('logs.txt', 'a') as f:
             f.write(val)
-
 
     class CityForm(FlaskForm):
         name = SelectField(u'Villes :',
@@ -153,10 +161,8 @@ def create_app(test_config=None):
         dateFin = DateField('Date', format='%Y-%m-%d', default=datetime.today())
 
     scheduler = BackgroundScheduler()
-    scheduler.add_job(func=automatization, trigger="interval", seconds=300)
+    scheduler.add_job(func=automatization, trigger="interval", seconds=3600)
     scheduler.start()
     atexit.register(lambda: scheduler.shutdown())
 
     return app
-
-
