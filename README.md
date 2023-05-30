@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-git 
-=======
 # Projet MSI
 
 ## Réalisé par :
@@ -42,4 +39,3 @@ Notez bien que les informations sont mises à jour chaque heures.
 Pour vérifier que les informations sont bien rajoutées dans la base de données, il suffit d’ouvrir le fichier `logs.txt` qui se situe à la racine du fichier. Celui-ci est rempli automatiquement par l’application après chaque ajout de données.
 
 J’espère que notre application vous plaira.
->>>>>>> 94a93fc5068001fd983cfb2427e50f27c5437cf8
