@@ -18,7 +18,6 @@ This project was created as part of a university course. It provides a user-frie
 
 ```markdown
 weather-app/
-├── 📁 app/                  # Application logic
 ├── 📁 static/               # Static files (CSS, JavaScript, images)
 ├── 📁 templates/            # HTML templates
 ├── 📄 .env                  # Environment variables
