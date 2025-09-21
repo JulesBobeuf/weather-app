@@ -80,3 +80,7 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 Jules Bobeuf  
 [LinkedIn](https://www.linkedin.com/in/bobeuf-jules/)  
 bobeuf.jules@gmail.com
+
+Aymeric Jakobowski  
+[LinkedIn](https://www.linkedin.com/in/aymeric-jakobowski/)  
+[GitHub](https://github.com/AymericJak)
