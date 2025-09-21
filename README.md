@@ -6,11 +6,6 @@
 
 This project was created as part of a university course. It provides a user-friendly interface to input a city name and receive the current temperature in Celsius.
 
-**Team Members:**  
-- Aymeric Jakobowski  
-- Jules Bobeuf  
-- Thomas Santoro  
-
 ## Built With
 
 [![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)  
