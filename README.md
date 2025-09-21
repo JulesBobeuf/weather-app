@@ -1,41 +1,87 @@
-# Projet MSI
+# weather-app
 
-## Réalisé par :
-- JAKOBOWSKI Aymeric
-- BOBEUF Jules
-- SANTORO Thomas
+**weather-app** is a simple web application developed using Python and Flask. It allows users to check the current temperature of a specified city.
 
-## Comment utiliser notre application ?
+## About The Project
 
-### Installation :
+This project was created as part of a university course. It provides a user-friendly interface to input a city name and receive the current temperature in Celsius.
 
-Notre application a été conçue pour être la plus simple d'utilisation possible.
+**Team Members:**  
+- Aymeric Jakobowski  
+- Jules Bobeuf  
+- Thomas Santoro  
 
-Afin de pouvoir utiliser notre application, vous devez vous rendre sur le projet GitLab grâce au lien suivant : https://gitlab.univ-artois.fr/thomas_santoro/projet-msi
+## Built With
 
-Une fois ceci réalisé, vous pouvez cliquer sur le bouton bleu a droite de votre écran `Clone`. Ceci vous donne l’accès à un URL que vous devez copier.
+[![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)  
+[![Flask](https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com/)  
+[![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)  
 
-Maintenant que vous avez réalisé ceci, vous pouvez le cloner dans un dossier que vous aurez créé au préalable.
+## Getting Started
 
-Pour cloner un projet, il vous suffit de vous rendre dans le dossier créé, de faire un clic droit et de sélectionner « ouvrir dans un terminal » une fois cela fait écrivez dans votre terminal la commande : git clone « L’url copié au préalable ».
+### Folder Structure
 
-Une fois cette étape finie, il ne vous reste plus qu’à ouvrir le projet et de le lancer dans une application. Nous vous conseillons PyCharm ou Visual Studio Code par exemple.
-
-Veuillez avoir installé toutes les dépendances nécessaires, sinon le projet ne marchera pas. 
-
-Afin que le fichier `.env` soit bien compatible avec l'application, veuillez exécuter cette commande :
+```markdown
+weather-app/
+├── 📁 app/                  # Application logic
+├── 📁 static/               # Static files (CSS, JavaScript, images)
+├── 📁 templates/            # HTML templates
+├── 📄 .env                  # Environment variables
+├── 📄 .gitignore            # Git ignore file
+├── 📄 app.py                # Main application file
+├── 📄 basedonnee.py         # Data handling script
+├── 📄 bd.sqlite             # SQLite database
+├── 📄 logs.txt              # Application logs
+├── 📄 visualisationDonnees.py # Data visualization script
+└── 📄 README.md             # Project documentation
 ```
-pip install python-dotenv
+
+### Prerequisites
+
+Ensure you have the following installed:
+
+```sh
+Python 3.9+
+pip
 ```
 
-Et pour terminer vous n’avez plus qu’à lancer le projet et vous rendre sur l’URL donné par l’application.
+### Installation & Build
 
-### Utilisation :
+1. Clone the repository:
 
-Une fois rendu sur l’URL récupérer grâce à l’installation précédente il n’y a rien de plus simple vous devez simplement remplir la case avec le nom de la ville que vous souhaitez et ceci vous permettra de récupérer toutes les informations sur cette ville.
+```sh
+git clone https://github.com/JulesBobeuf/weather-app.git
+cd weather-app
+```
 
-Notez bien que les informations sont mises à jour chaque heures.
+2. Install dependencies:
 
-Pour vérifier que les informations sont bien rajoutées dans la base de données, il suffit d’ouvrir le fichier `logs.txt` qui se situe à la racine du fichier. Celui-ci est rempli automatiquement par l’application après chaque ajout de données.
+```sh
+pip install -r requirements.txt
+```
 
-J’espère que notre application vous plaira.
+3. Set up environment variables:
+
+```sh
+cp .env.example .env
+```
+
+4. Run the application:
+
+```sh
+python app.py
+```
+
+### Running the Application
+
+After setting up, navigate to `http://localhost:5000` in your browser to view the application.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+## Contact
+
+Jules Bobeuf  
+[LinkedIn](https://www.linkedin.com/in/bobeuf-jules/)  
+bobeuf.jules@gmail.com
