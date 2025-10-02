@@ -1,6 +1,8 @@
-# weather-app
-
-**weather-app** is a simple web application developed using Python and Flask. It allows users to check the current temperature of a specified city.
+<div align="center">
+  <h1 align="center">Weather Application</h1>
+  <img src="assets/readme-weather.png" alt="Weather App Screenshot" width="600">  <p align="center">
+    A Weather web application, built with Python & Flask
+</div>
 
 ## About The Project
 
